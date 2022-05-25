@@ -1,9 +1,12 @@
-# checks matching type, matching position + type, full match
-module Checkable
-end
 # computer generates/stores random 4-digit code 
 # later a human can create the secret code 
 module CodeGenerator
+  def generate(array)
+    array.each_index { |idx| array[idx] = rand(1..9)}
+  end
+end
+# checks matching type, matching position + type, full match
+module Checkable
 end
 # displays board and hints each turn
 # updates board with past plays 
@@ -28,16 +31,29 @@ class Board
     puts @board
   end
 end
-# compares guess code to secret code
+# takes input
+# compares input to secret code
 # end game if guess correct
 # loop to new round if incorrect guess
 # generates "white/red" hint pegs
 # increments turn number 
 # ends game after 12 turns
 class GameLogic
-  include Checkable
+  attr_accessor :secret_code
+
   include CodeGenerator
+  include Checkable
+
+  def initialize
+    @secret_code = generate(Array.new(4))
+  end
 end
 # runs the whole game
 class Game < GameLogic
+  def initialize
+    super
+  end
 end
+
+my_game = Game.new
+print my_game.secret_code
