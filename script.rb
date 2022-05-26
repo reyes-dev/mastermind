@@ -1,23 +1,34 @@
-# computer generates/stores random 4-digit code 
-# later a human can create the secret code 
+# computer generates/stores random 4-digit code
+# later a human can create the secret code
 module CodeGenerator
   def generate(array)
-    array.each_index { |idx| array[idx] = rand(1..9)}
+    array.each_index { |idx| array[idx] = rand(1..6) }
   end
 end
 # checks matching type, matching position + type, full match
 module Checkable
+  def match_type
+  end
+
+  def match_position
+  end
+
+  def match_full
+    if @guess_code == @secret_code
+      @game_over = true
+    end
+  end
 end
 # displays board and hints each turn
 # updates board with past plays 
 class Board
   attr_accessor :board_array, :board
   # makes empty array
-  # changes made to array don't affect string variable board 
+  # changes made to array don't affect string variable board
   def initialize
     @board_array = Array.new(12) { Array.new(4, '?') }
   end
-  # this merely displays the array in string form 
+  # this merely displays the array in string form
   def board_setup
     @board = ''
 
@@ -39,14 +50,24 @@ end
 # increments turn number 
 # ends game after 12 turns
 class GameLogic
-  attr_accessor :secret_code
+  attr_accessor :secret_code, :game_over, :player_code
 
   include CodeGenerator
   include Checkable
 
   def initialize
     @secret_code = generate(Array.new(4))
+    @game_over = false
   end
+
+  def guess_code
+    loop do
+      puts "Enter a 4-digit code of numbers 1-6"
+      @player_code = gets.chomp.split('').map(&:to_i)
+      break if @player_code.join.match?(/^[1-6]{4}$/)
+    end
+  end
+
 end
 # runs the whole game
 class Game < GameLogic
@@ -57,3 +78,5 @@ end
 
 my_game = Game.new
 print my_game.secret_code
+my_game.guess_code
+print "My code is #{my_game.player_code}"
