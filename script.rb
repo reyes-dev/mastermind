@@ -1,12 +1,9 @@
-# computer generates/stores random 4-digit code
-# later a human can create the secret code
 module CodeGenerator
   def generate(array)
     array.each_index { |idx| array[idx] = rand(1..6) }
   end
 end
-# checks matching number, matching position + number, full match
-# adds to hints array
+
 module Checkable
   def match_type_position
     @temp_code.each_index do |idx|
@@ -40,16 +37,14 @@ module Checkable
     self.match_full
   end
 end
-# displays board and hints each turn
-# updates board with past plays 
+
 class Board
   attr_accessor :board_array, :board
-  # makes empty array
-  # changes made to array don't affect string variable board
+
   def initialize
     @board_array = Array.new(12) { Array.new(4, '?') }
   end
-  # this merely displays the array in string form
+
   def board_setup
     @board = ''
 
@@ -64,14 +59,7 @@ class Board
     puts @board
   end
 end
-# takes input
-# compares input to secret code
-# end game if guess correct
-# loop to new round if incorrect guess
-# update board
-# generate "white/red" hint pegs
-# increment turn number
-# ends game after 12 turns
+
 class GameLogic < Board
   attr_accessor :secret_code, :game_over, :player_code, :round, :hints, :temp_array, :temp_code
 
@@ -92,7 +80,7 @@ class GameLogic < Board
     @temp_array.concat(@secret_code)
     @temp_code.concat(@player_code)
   end
-  
+
   def clear_codes
     @temp_array.clear
     @temp_code.clear
@@ -110,7 +98,7 @@ class GameLogic < Board
     @board_array[@round] = @player_code
   end
 end
-# runs the whole game
+
 class Game < GameLogic
   def initialize
     super
@@ -127,7 +115,7 @@ class Game < GameLogic
       self.round += 1
     end
     self.board_display
-    puts "The secret code was: #{self.secret_code}"
+    puts "\n The secret code was: #{self.secret_code} \n"
   end
 end
 
