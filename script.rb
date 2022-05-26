@@ -12,9 +12,9 @@ module Checkable
 
   def match_position
   end
-
+  # needs parameters?
   def match_full
-    if @guess_code == @secret_code
+    if @player_code == @secret_code
       @game_over = true
     end
   end
@@ -33,12 +33,13 @@ class Board
     @board = ''
 
     @board_array.each_index do |idx|
-      @board.concat("   #{@board_array[idx].join(' | ')}\n")
+      @board.concat("   #{@board_array.reverse[idx].join(' | ')}\n")
       @board.concat("   --------------\n") 
     end
   end
 
   def board_display
+    self.board_setup
     puts @board
   end
 end
@@ -46,18 +47,21 @@ end
 # compares input to secret code
 # end game if guess correct
 # loop to new round if incorrect guess
-# generates "white/red" hint pegs
-# increments turn number 
+# update board
+# generate "white/red" hint pegs
+# increment turn number
 # ends game after 12 turns
-class GameLogic
-  attr_accessor :secret_code, :game_over, :player_code
+class GameLogic < Board
+  attr_accessor :secret_code, :game_over, :player_code, :round
 
   include CodeGenerator
   include Checkable
 
   def initialize
+    super
     @secret_code = generate(Array.new(4))
     @game_over = false
+    @round = 0
   end
 
   def guess_code
@@ -68,15 +72,27 @@ class GameLogic
     end
   end
 
+  def update_board
+    @board_array[@round] = @player_code
+  end
 end
 # runs the whole game
 class Game < GameLogic
   def initialize
     super
   end
+
+  def play
+    until game_over || @round > 11
+      self.board_display
+      self.guess_code
+      self.update_board
+      self.match_full
+      self.round += 1
+    end
+    self.board_display
+  end
+
 end
 
-my_game = Game.new
-print my_game.secret_code
-my_game.guess_code
-print "My code is #{my_game.player_code}"
+my_game = Game.new.play
