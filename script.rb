@@ -5,18 +5,39 @@ module CodeGenerator
     array.each_index { |idx| array[idx] = rand(1..6) }
   end
 end
-# checks matching type, matching position + type, full match
+# checks matching number, matching position + number, full match
+# adds to hints array
 module Checkable
-  def match_type
+  def match_type_position
+    @temp_code.each_index do |idx|
+      if @temp_code[idx] == @temp_array[idx]
+        @hints[@round].push('★')
+        @temp_array[idx] = nil
+        @temp_code[idx] = 'full'
+      end
+    end
   end
 
-  def match_position
+  def match_type
+    @temp_code.each_with_index do |num, idx|
+      if @temp_array.any?(num)
+        @hints[@round].push('☆')
+        @temp_array[@temp_array.find_index { |e| e == num }] = nil
+        @temp_code[idx] = 'full'
+      end
+    end
   end
-  # needs parameters?
+
   def match_full
     if @player_code == @secret_code
       @game_over = true
     end
+  end
+
+  def check_all
+    self.match_type_position
+    self.match_type
+    self.match_full
   end
 end
 # displays board and hints each turn
@@ -33,7 +54,7 @@ class Board
     @board = ''
 
     @board_array.each_index do |idx|
-      @board.concat("   #{@board_array.reverse[idx].join(' | ')}\n")
+      @board.concat("   #{@board_array.reverse[idx].join(' | ')}  Hints: #{@hints.reverse[idx]} \n")
       @board.concat("   --------------\n") 
     end
   end
@@ -52,7 +73,7 @@ end
 # increment turn number
 # ends game after 12 turns
 class GameLogic < Board
-  attr_accessor :secret_code, :game_over, :player_code, :round
+  attr_accessor :secret_code, :game_over, :player_code, :round, :hints, :temp_array, :temp_code
 
   include CodeGenerator
   include Checkable
@@ -60,11 +81,24 @@ class GameLogic < Board
   def initialize
     super
     @secret_code = generate(Array.new(4))
+    @temp_array = []
+    @temp_code = []
     @game_over = false
     @round = 0
+    @hints = Array.new(12) { Array.new }
   end
 
-  def guess_code
+  def equalize_codes
+    @temp_array.concat(@secret_code)
+    @temp_code.concat(@player_code)
+  end
+  
+  def clear_codes
+    @temp_array.clear
+    @temp_code.clear
+  end
+
+  def input_code
     loop do
       puts "Enter a 4-digit code of numbers 1-6"
       @player_code = gets.chomp.split('').map(&:to_i)
@@ -85,14 +119,16 @@ class Game < GameLogic
   def play
     until game_over || @round > 11
       self.board_display
-      self.guess_code
+      self.input_code
+      self.equalize_codes
       self.update_board
-      self.match_full
+      self.check_all
+      self.clear_codes
       self.round += 1
     end
     self.board_display
+    puts "The secret code was: #{self.secret_code}"
   end
-
 end
 
 my_game = Game.new.play
