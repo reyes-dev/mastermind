@@ -11,6 +11,7 @@ AI Mastermind
 - The AI generated secret code is completely random
 - The board is updated each round with the guessed code
 - The secret code is not revealed until the game is won or 12 rounds have passed
+
 Human Mastermind
 - Player is asked to input a 4 digit secret code #1-6
 - AI will try to crack it by generating a random number
