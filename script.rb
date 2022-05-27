@@ -1,3 +1,5 @@
+# mm_choice = gets.chomp.to_i 
+# mm_choice == 2 ? "Mastermind is AI" : mm_choice == 1 ? "You are the Mastermind" : "Enter 1 or 2"
 module CodeGenerator
   def generate(array)
     array.each_index { |idx| array[idx] = rand(1..6) }
@@ -61,7 +63,7 @@ class Board
 end
 
 class GameLogic < Board
-  attr_accessor :secret_code, :game_over, :player_code, :round, :hints, :temp_array, :temp_code
+  attr_accessor :secret_code, :game_over, :player_code, :round, :hints, :temp_array, :temp_code, :mm_choice
 
   include CodeGenerator
   include Checkable
@@ -104,7 +106,8 @@ class Game < GameLogic
     super
   end
 
-  def play
+  def play_human
+    puts "Mastermind is AI"
     until game_over || @round > 11
       self.board_display
       self.input_code
@@ -117,6 +120,23 @@ class Game < GameLogic
     self.board_display
     puts "\n The secret code was: #{self.secret_code} \n"
   end
+
+  def play_computer
+    puts "You are the Mastermind"
+    self.input_code
+    until game_over || @round > 11
+      @game_over = true
+    end
+  end
+
+  def choose_mastermind
+    loop do
+      puts "Enter 1 to be the Mastermind | Enter 2 for AI Mastermind"
+      @mm_choice = gets.chomp.split('').map(&:to_i)
+      @mm_choice == [2] ? self.play_human : @mm_choice == [1] ? self.play_computer : "Wrong"
+      break if @mm_choice.join.match?(/^[1-2]{1}$/)
+    end
+  end
 end
 
-my_game = Game.new.play
+my_game = Game.new.choose_mastermind
