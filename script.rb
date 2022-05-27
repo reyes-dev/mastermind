@@ -8,27 +8,27 @@ end
 
 module Checkable
   def match_type_position
-    @temp_code.each_index do |idx|
-      if @temp_code[idx] == @temp_array[idx]
+    @human_array.each_index do |idx|
+      if @human_array[idx] == @comp_array[idx]
         @hints[@round].push('★')
-        @temp_array[idx] = nil
-        @temp_code[idx] = 'full'
+        @comp_array[idx] = nil
+        @human_array[idx] = 'full'
       end
     end
   end
 
   def match_type
-    @temp_code.each_with_index do |num, idx|
-      if @temp_array.any?(num)
+    @human_array.each_with_index do |num, idx|
+      if @comp_array.any?(num)
         @hints[@round].push('☆')
-        @temp_array[@temp_array.find_index { |e| e == num }] = nil
-        @temp_code[idx] = 'full'
+        @comp_array[@comp_array.find_index { |e| e == num }] = nil
+        @human_array[idx] = 'full'
       end
     end
   end
 
   def match_full
-    if @player_code == @secret_code
+    if @human_code == @comp_code
       @game_over = true
     end
   end
@@ -63,41 +63,41 @@ class Board
 end
 
 class GameLogic < Board
-  attr_accessor :secret_code, :game_over, :player_code, :round, :hints, :temp_array, :temp_code, :mm_choice
+  attr_accessor :comp_code, :game_over, :human_code, :round, :hints, :comp_array, :human_array, :mm_choice
 
   include CodeGenerator
   include Checkable
 
   def initialize
     super
-    @secret_code = generate(Array.new(4))
-    @temp_array = []
-    @temp_code = []
+    @comp_code = generate(Array.new(4))
+    @hints = Array.new(12) { Array.new }
     @game_over = false
     @round = 0
-    @hints = Array.new(12) { Array.new }
+    @comp_array = []
+    @human_array = []
   end
 
   def equalize_codes
-    @temp_array.concat(@secret_code)
-    @temp_code.concat(@player_code)
+    @comp_array.concat(@comp_code)
+    @human_array.concat(@human_code)
   end
 
   def clear_codes
-    @temp_array.clear
-    @temp_code.clear
+    @comp_array.clear
+    @human_array.clear
   end
 
   def input_code
     loop do
       puts "Enter a 4-digit code of numbers 1-6"
-      @player_code = gets.chomp.split('').map(&:to_i)
-      break if @player_code.join.match?(/^[1-6]{4}$/)
+      @human_code = gets.chomp.split('').map(&:to_i)
+      break if @human_code.join.match?(/^[1-6]{4}$/)
     end
   end
 
-  def update_board
-    @board_array[@round] = @player_code
+  def update_board(guesser_code)
+    @board_array[@round] = guesser_code
   end
 end
 
@@ -112,13 +112,13 @@ class Game < GameLogic
       self.board_display
       self.input_code
       self.equalize_codes
-      self.update_board
+      self.update_board(@human_code)
       self.check_all
       self.clear_codes
       self.round += 1
     end
     self.board_display
-    puts "\n The secret code was: #{self.secret_code} \n"
+    puts "\n The secret code was: #{self.comp_code} \n"
   end
 
   def play_computer
