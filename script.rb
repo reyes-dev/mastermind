@@ -1,5 +1,3 @@
-# mm_choice = gets.chomp.to_i 
-# mm_choice == 2 ? "Mastermind is AI" : mm_choice == 1 ? "You are the Mastermind" : "Enter 1 or 2"
 module CodeGenerator
   def generate(array)
     array.each_index { |idx| array[idx] = rand(1..6) }
