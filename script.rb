@@ -4,6 +4,14 @@ module CodeGenerator
   def generate(array)
     array.each_index { |idx| array[idx] = rand(1..6) }
   end
+
+  def modify_guess(array, enemy_array)
+    array.each_index do |idx|
+      unless array[idx] == enemy_array[idx]
+        array[idx] = rand(1..6)
+      end
+    end
+  end
 end
 
 module Checkable
@@ -70,7 +78,7 @@ class GameLogic < Board
 
   def initialize
     super
-    @comp_code = generate(Array.new(4))
+    @comp_code = generate(Array.new(4) { Array.new })
     @hints = Array.new(12) { Array.new }
     @game_over = false
     @round = 0
@@ -97,7 +105,7 @@ class GameLogic < Board
   end
 
   def update_board(guesser_code)
-    @board_array[@round] = guesser_code
+    @board_array[@round].replace(guesser_code)
   end
 end
 
@@ -107,7 +115,7 @@ class Game < GameLogic
   end
 
   def play_human
-    puts "Mastermind is AI"
+    puts "AI is Mastermind"
     until game_over || @round > 11
       self.board_display
       self.input_code
@@ -125,8 +133,16 @@ class Game < GameLogic
     puts "You are the Mastermind"
     self.input_code
     until game_over || @round > 11
-      @game_over = true
+      puts "Your secret code is: #{self.human_code}"
+      self.board_display
+      self.modify_guess(@comp_code, @human_code)
+      self.update_board(@comp_code)
+      self.match_full
+      self.round += 1
+      puts "==========================="
     end
+    self.board_display
+    puts "\n The final AI guess was: #{self.comp_code} \n"
   end
 
   def choose_mastermind
